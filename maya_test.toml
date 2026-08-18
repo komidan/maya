@@ -1,0 +1,46 @@
+# This is a testing-only configuration file.
+
+[project]
+name = "maya"
+author = "komidan"
+version = "0.1.0"
+
+# default build, always uses these
+[build]
+standard = "c99"
+compiler = "gcc"
+warnings = ["all", "extra", "pedantic"] # -Wextra, -Wall-, -Wpedantic
+
+# specify extra flags
+cflags = []
+ldflags = []
+libraries = []
+
+# added onto the default build flags
+[build.debug]
+cflags = ["-g", "-O0", "-DDEBUG"]
+
+# final build additional flags
+[build.release]
+cflags = ["-O2", "-DNDEBUG"]
+
+[paths]
+source = "src"    # source files
+build = "build"   # used to build the project
+binary = "bin"    # binaries compiled by Maya
+library = "lib"   # for third-party included libraries
+
+[dependencies.libmaya]
+type = "file"
+url = "https://raw.githubusercontent.com/komidan/libmaya/refs/heads/master/src/shared/libmaya.h"
+path = "lib/"
+
+[[target]]
+name = "maya"
+type = "executable"
+source = "src"
+
+[[target]]
+name = "libmaya"
+type = "shared"
+source = "src"
