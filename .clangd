@@ -1,0 +1,5 @@
+CompileFlags:
+  Add:
+    - -I../lib/
+    - -L../lib/
+    - -std=c99
