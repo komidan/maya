@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "lexer.h"
 #include "types.h"
+#define MAYA_IMPLEMENTATION
+#define MAYA_MODULE_LOGS
+// #include "../lib/libmaya.h"
 
-char *read_file(const char *fpath, size_t *length)
+static char *read_file(const char *fpath, size_t *length)
 {
     // create file pointer
     FILE *fp = fopen(fpath, "rb");
@@ -17,7 +21,7 @@ char *read_file(const char *fpath, size_t *length)
     // get the file size
     fseek(fp, 0, SEEK_END);
     u64 size = ftell(fp);
-    if (size < 0)
+    if (size < 1)
     {
         fclose(fp);
         return NULL;
@@ -52,57 +56,74 @@ char *read_file(const char *fpath, size_t *length)
     return buffer;
 }
 
-static char* read_string(const char *source, size_t *pos, size_t *column,
-    size_t flen)
+static int read_string(const char *src, size_t *pos, size_t *col, size_t flen,
+    String *string)
 {
     // Skip the opening quote.
     (*pos)++;
-    (*column)++;
+    (*col)++;
 
     size_t start = *pos;
 
-    while (*pos < flen && source[*pos] != '"')
+    while (*pos <= flen && src[*pos] != '"')
     {
-        if (source[*pos] == '\n')
+        if (src[*pos] == '\n')
         {
-            return NULL;
+            return 1;
         }
 
         // ignore escaped characters
-        if (source[*pos] == '\\' && *pos + 1 < flen)
+        if (src[*pos] == '\\' && *pos + 1 < flen)
         {
             *pos += 2;
-            *column += 2;
+            *col += 2;
         }
         else
         {
             (*pos)++;
-            (*column)++;
+            (*col)++;
         }
     }
 
     // no closing quote
-    if (*pos > flen)
+    if (*pos >= flen)
     {
-        return NULL;
+        return 1;
     }
 
-    size_t len = *pos - start;
-
-    char *str = malloc(len + 1);
-    if (!str)
-    {
-        return NULL;
-    }
-
-    memcpy(str, source + start, len);
-    str[len] = '\0';
+    string->data = src + start;
+    string->len = *pos - start;
 
     // skip closing quote
     (*pos)++;
-    (*column)++;
+    (*col)++;
 
-    return str;
+    return 0;
+}
+
+// static float read_float(const char* src, size_t *pos, size_t *col, size_t flen)
+
+static i32 read_int(const char* src, size_t flen, size_t *pos, size_t *col,
+    i64 *value)
+{
+    i64 result = 0;
+
+    // safe guard against not being digit
+    if (*pos >= flen || !isdigit((uchar)src[*pos]))
+    {
+        return 1;
+    }
+
+    while (*pos <= flen && isdigit((uchar)src[*pos]))
+    {
+        result = result * 10 + (src[*pos] - '0');
+
+        (*pos)++;
+        (*col)++;
+    }
+
+    *value = result;
+    return 0;
 }
 
 static int add_token(TokenStore *tokens, TokenType type,
@@ -129,6 +150,9 @@ static int add_token(TokenStore *tokens, TokenType type,
         tokens->capacity = new_capacity;
     }
 
+    // Temp print token info
+    printf("%zu:%zu %d %s\n", line, column, type, value);
+
     // add the token to the token array
     tokens->tokens[tokens->count++] = (Token) {
         .type = type,
@@ -145,8 +169,8 @@ int lexer(TokenStore *tokens, const char *fpath)
     size_t pos = 0;
     size_t line = 1;
     size_t column = 1;
-
     size_t flen;
+
     char *source = read_file(fpath, &flen);
     if (!source)
     {
@@ -210,20 +234,14 @@ int lexer(TokenStore *tokens, const char *fpath)
                 break;
 
             // String Literals
-            case '"':
+            case '"': {
                 s_col = column;
+                String string;
 
-                char *string = read_string(
-                    source,
-                    &pos,
-                    &column,
-                    flen
-                );
-
-                if (!string)
+                if (read_string( source, &pos, &column, flen, &string))
                 {
-                    fprintf(stderr, "Unterminated string at line %zu, column %zu\n",
-                    line, s_col);
+                    fprintf(stderr, "Unterminated string at %zu:%zu\n", line,
+                        s_col);
 
                     free(source);
                     return 1;
@@ -232,8 +250,43 @@ int lexer(TokenStore *tokens, const char *fpath)
                 TokenValue value = {
                     .string = string
                 };
-
                 add_token(tokens, TOKEN_STRING, value, line, s_col);
+                break;
+            }
+
+            // Integer Literal
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9': {
+                printf("Number found at %zu:%zu\n", line, column);
+
+                s_col = column;
+                i64 result;
+
+                i32 r = read_int(
+                    source,
+                    flen,
+                    &pos,
+                    &column,
+                    &result
+                );
+
+                if (r)
+                {
+                    fprintf(stderr, "Number failed to parse at %zu:%zu\n", line, s_col);
+                }
+                TokenValue value = {
+                    .integer = result
+                };
+                add_token(tokens, TOKEN_INTEGER, value, line, s_col);
+                break;
+            }
 
             default:
                 pos++;
