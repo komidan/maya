@@ -22,8 +22,13 @@ typedef enum {
     TOKEN_ERRORS
 } TokenType;
 
+typedef struct {
+    const char *data;
+    size_t len;
+} String;
+
 typedef union {
-    char *string;
+    String string;
     i64 integer;
 } TokenValue;
 
@@ -41,7 +46,6 @@ typedef struct {
 } TokenStore;
 
 int lexer(TokenStore *tokens, const char *fpath);
-char *read_file(const char *fpath, size_t *length);
 
 #endif
 
