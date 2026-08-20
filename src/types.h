@@ -20,4 +20,6 @@ typedef int64_t   i64;
 typedef uintmax_t umax;
 typedef intmax_t  imax;
 
+typedef unsigned char uchar;
+
 #endif
