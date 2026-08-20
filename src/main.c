@@ -4,15 +4,17 @@
 #include "lexer.h"
 
 TokenStore tokens;
-// maya_config_t config;
 
-int main(int argc, char *argv[])
+// NOTE: Eventually, we'll want to support passing arguments of some kind, like
+// `maya --debug` to execute the debug parameters, or `maya --release`.
+int main(void)
 {
-    if (lexer(&tokens, "maya.toml") != 0)
+    // TODO: Make the check for the file more robust and give proper error
+    // messages.
+    if (lexer(&tokens, "maya_test.toml") != 0)
     {
-        fprintf(stderr, "Something went wrong lexing.\n");
+        fprintf(stderr, "Something went wrong (file not found?).\n");
     }
-
 
     // parse(&config, &tokens);
 
