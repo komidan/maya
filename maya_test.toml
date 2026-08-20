@@ -1,4 +1,6 @@
-# This is a testing-only configuration file.
+# This is a testing-only configuration file
+
+maya = 132
 
 [project]
 name = "maya"
