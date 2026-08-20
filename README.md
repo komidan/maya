@@ -56,6 +56,7 @@ version = "0.1.0"
 [build]
 compiler = "gcc" # clang, msvc, gcc
 standard = "c99" # c89, c99, c11, c17, c23
+# https://gcc.gnu.org/onlinedocs/gcc-14.2.0/gcc/Warning-Options.html#index-Wno-unused-parameter
 warnings = ["all", "extra", "pedantic", "error"]
 
 # You can use these to add other arguments to GCC that don't have explicit
