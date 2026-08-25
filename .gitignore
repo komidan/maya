@@ -1,2 +1,4 @@
-maya
 .zed/
+archive/
+build/
+bin/
