@@ -1,11 +1,13 @@
 # Maya-Build
 
+This is still very much work in progress, infact, _nothing_ works right now!
+
 Makefiles are old and boring. They work, but can easily grow to become overcomplicated with wildcards and other features. It gets to a point where you aren't even using Makefile's for Make anymore, you could do the same with shell scripting. Or better- make it yourself...
 
 Also note, I am new to C. This is an exploratory project to learn more. I find that there is no better way to learn than to do something that actually solves a problem over making the fifth todo-app of the month.
 
 - - -
-# Usage
+# Usage (WIP)
 
 <table>
     <tr>
