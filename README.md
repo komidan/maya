@@ -1,6 +1,10 @@
 # Maya-Build
 
+- - -
+# DISCLAIMER!
+
 This is still very much work in progress, infact, _nothing_ works right now!
+- - -
 
 Makefiles are old and boring. They work, but can easily grow to become overcomplicated with wildcards and other features. It gets to a point where you aren't even using Makefile's for Make anymore, you could do the same with shell scripting. Or better- make it yourself...
 
@@ -85,7 +89,8 @@ cflags = ["-g", "-O0", "-DDEBUG"]
 [build.release]
 cflags = ["-O2", "-DNDEBUG"]
 
-# I'm still considering this section, is it required or not... what would then # be the default actions if not required?
+# I'm still considering this section, is it required or not... what would then
+# be the default actions if not required?
 [[target]]
 name = "maya"
 type = "exe"
