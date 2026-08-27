@@ -11,8 +11,6 @@ int main(void)
 
     if (lexer(&store, "maya_test.toml"))
     {
-        fprintf(stderr, "Something went wrong (file not found?).\n");
-        token_store_free(&store);
         return 1;
     }
 

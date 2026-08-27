@@ -7,7 +7,7 @@
 // All possible token types that can be found in a `.toml` file.
 typedef enum {
     TOKEN_EOF,
-    TOKEN_IDENTIFIER,
+    TOKEN_KEY,
 
     TOKEN_STRING,
     TOKEN_INTEGER,

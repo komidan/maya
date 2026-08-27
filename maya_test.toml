@@ -1,7 +1,5 @@
 # This is a testing-only configuration file
 
-maya = 132
-
 [project]
 name = "maya"
 author = "komidan"
@@ -12,6 +10,7 @@ version = "0.1.0"
 standard = "c99"
 compiler = "gcc"
 warnings = ["all", "extra", "pedantic"] # -Wextra, -Wall-, -Wpedantic
+max-warnings = 20
 
 # specify extra flags
 cflags = []

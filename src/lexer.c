@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <maya/lexer.h>
 
 void token_print(TokenStore *store, size_t index)
@@ -109,6 +110,77 @@ static char *read_file(const char *fpath, size_t *len)
     return buffer;
 }
 
+static int32_t read_key(const char *src, size_t fsize, size_t *pos)
+{
+    int32_t len = 0;
+
+    while (*pos < fsize) {
+        char c = src[*pos];
+
+        if (!(isalnum((unsigned char)c) || c == '_' || c == '-'))
+        {
+            break;
+        }
+
+        (*pos)++;
+        len++;
+    }
+
+    return len;
+}
+
+static int32_t read_string(const char *src, size_t fsize, size_t *pos)
+{
+    int32_t len = 0;
+
+    // add one for the opening quote
+    (*pos)++;
+
+    while (*pos < fsize && src[*pos] != '"')
+    {
+        if (src[*pos] == '\n')
+        {
+            // TODO: Add line, column information to this.
+            fprintf(stderr, "Unterminated string literal.\n");
+            return -1;
+        }
+
+        // ignore escaped characters
+        if (src[*pos] == '\\' && *pos + 1 < fsize)
+        {
+            *pos += 2;
+            len += 2;
+        }
+        else
+        {
+            (*pos)++;
+            len++;
+        }
+    }
+
+    // skip closing quote
+    (*pos)++;
+
+    return len;
+}
+
+static int32_t read_int(const char *src, size_t fsize, size_t *pos)
+{
+    if (*pos > fsize || !isdigit((char)src[*pos]))
+    {
+        return -1;
+    }
+
+    int32_t len = 0;
+    while (*pos <= fsize && isdigit((char)src[*pos]))
+    {
+        len++;
+        (*pos)++;
+    }
+
+    return len;
+}
+
 int lexer(TokenStore *store, const char *fpath)
 {
     // position inside file, (0, fsize);
@@ -132,8 +204,6 @@ int lexer(TokenStore *store, const char *fpath)
     while (pos < fsize)
     {
         char c = store->source[pos];
-
-        size_t start_pos = pos;
 
         // TODO: Finish this lexing step.
         switch (c)
@@ -184,10 +254,81 @@ int lexer(TokenStore *store, const char *fpath)
                 column++;
                 break;
 
-            default:
+            case '"': {
+                int32_t len = read_string(
+                    store->source,
+                    fsize,
+                    &pos
+                );
+
+                if (len < 1)
+                {
+                    fprintf(stderr, "Failed to parse string (%zu:%zu)\n",
+                        line, column);
+
+                    token_store_free(store);
+                    return 1;
+                }
+
+                token_add(store, TOKEN_STRING, line, column, pos-(len+1), len);
+                column += len;
+                break;
+            }
+
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9': {
+                int32_t len = read_int(
+                    store->source,
+                    fsize,
+                    &pos
+                );
+
+                if (len < 1)
+                {
+                    fprintf(stderr, "Failed to parse number (%zu:%zu)\n",
+                        line, column);
+                    token_store_free(store);
+                    return 1;
+                }
+
+                token_add(store, TOKEN_INTEGER, line, column, pos-len, len);
+                column += len;
+                break;
+            }
+
+            case ' ':
                 pos++;
                 column++;
                 break;
+
+            // Keys / EOF
+            default: {
+                int32_t len = read_key(
+                    store->source,
+                    fsize,
+                    &pos
+                );
+
+                if (len < 1)
+                {
+                    fprintf(stderr, "Failed to parse key (%zu:%zu)\n",
+                        line, column);
+                    token_store_free(store);
+                    return 1;
+                }
+
+                token_add(store, TOKEN_KEY, line, column,
+                         pos-len, len);
+                column += len;
+                break;
+            }
         }
     }
 
