@@ -3,20 +3,22 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 // All possible token types that can be found in a `.toml` file.
 typedef enum {
-    TOKEN_EOF,
-    TOKEN_KEY,
+    TOKEN_EOF,      // 0
+    TOKEN_KEY,      // 1
 
-    TOKEN_STRING,
-    TOKEN_INTEGER,
+    TOKEN_STRING,   // 2
+    TOKEN_INTEGER,  // 3
+    TOKEN_BOOLEAN,  // 4
 
-    TOKEN_LBRACKET,
-    TOKEN_RBRACKET,
-    TOKEN_EQUALS,
-    TOKEN_COMMA,
-    TOKEN_PERIOD,
+    TOKEN_LBRACKET, // 5
+    TOKEN_RBRACKET, // 6
+    TOKEN_EQUALS,   // 7
+    TOKEN_COMMA,    // 8
+    TOKEN_PERIOD,   // 9
 } TokenType;
 
 typedef struct {

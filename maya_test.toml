@@ -10,7 +10,9 @@ version = "0.1.0"
 standard = "c99"
 compiler = "gcc"
 warnings = ["all", "extra", "pedantic"] # -Wextra, -Wall-, -Wpedantic
-max-warnings = 20
+max-warnings = 20 # int test
+boolean = true
+value = false
 
 # specify extra flags
 cflags = []
@@ -25,23 +27,24 @@ cflags = ["-g", "-O0", "-DDEBUG"]
 [build.release]
 cflags = ["-O2", "-DNDEBUG"]
 
-[paths]
-source = "src"    # source files
-build = "build"   # used to build the project
-binary = "bin"    # binaries compiled by Maya
-library = "lib"   # for third-party included libraries
+# [paths]
+# source = "src"    # source files
+# build = "build"   # used to build the project
+# binary = "bin"    # binaries compiled by Maya
+# library = "lib"   # for third-party included libraries
+# include = "inc"   # personal header files, can be namespaced
 
-[dependencies.libmaya]
-type = "file"
-url = "https://raw.githubusercontent.com/komidan/libmaya/refs/heads/master/src/shared/libmaya.h"
-path = "lib/"
+# [dependencies.libmaya]
+# type = "file"
+# url = "https://raw.githubusercontent.com/komidan/libmaya/refs/heads/master/src/shared/libmaya.h"
+# path = "lib/"
 
-[[target]]
-name = "maya"
-type = "executable"
-source = "src"
+# [[target]]
+# name = "maya"
+# type = "executable"
+# source = "src"
 
-[[target]]
-name = "libmaya"
-type = "shared"
-source = "src"
+# [[target]]
+# name = "libmaya"
+# type = "shared"
+# source = "src"

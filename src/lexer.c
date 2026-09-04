@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 #include <maya/lexer.h>
 
@@ -7,7 +8,7 @@ void token_print(TokenStore *store, size_t index)
 {
     Token *token = &store->tokens[index];
 
-    printf("[MAYA] #%d (%zu:%zu) src[%zu] = \"%.*s\"\n",
+    printf("[MAYA] #%d (%4zu:%-4zu) src[%zu]\t=  \"%.*s\"\n",
         token->type,
         token->line,
         token->column,
@@ -158,6 +159,11 @@ static int32_t read_string(const char *src, size_t fsize, size_t *pos)
         }
     }
 
+    if (*pos >= fsize)
+    {
+        return -1;
+    }
+
     // skip closing quote
     (*pos)++;
 
@@ -166,13 +172,13 @@ static int32_t read_string(const char *src, size_t fsize, size_t *pos)
 
 static int32_t read_int(const char *src, size_t fsize, size_t *pos)
 {
-    if (*pos > fsize || !isdigit((char)src[*pos]))
+    if (*pos >= fsize || !isdigit((unsigned char)src[*pos]))
     {
         return -1;
     }
 
     int32_t len = 0;
-    while (*pos <= fsize && isdigit((char)src[*pos]))
+    while (*pos < fsize && isdigit((unsigned char)src[*pos]))
     {
         len++;
         (*pos)++;
@@ -213,6 +219,12 @@ int lexer(TokenStore *store, const char *fpath)
                 pos++;
                 line++;
                 column = 1;
+                break;
+
+            case '\t':
+            case ' ':
+                pos++;
+                column++;
                 break;
 
             // Ignore all comments.
@@ -303,13 +315,10 @@ int lexer(TokenStore *store, const char *fpath)
                 break;
             }
 
-            case ' ':
-                pos++;
-                column++;
-                break;
-
             // Keys / EOF
             default: {
+                size_t start = pos;
+
                 int32_t len = read_key(
                     store->source,
                     fsize,
@@ -324,8 +333,27 @@ int lexer(TokenStore *store, const char *fpath)
                     return 1;
                 }
 
-                token_add(store, TOKEN_KEY, line, column,
-                         pos-len, len);
+                TokenType type = TOKEN_KEY;
+
+                // Is it a boolean value?
+                if (len == 4 && memcmp(store->source+start,"true",4)==0)
+                {
+                    type = TOKEN_BOOLEAN;
+                }
+                else if (len == 5 && memcmp(store->source+start,"false",5)==0)
+                {
+                    type = TOKEN_BOOLEAN;
+                }
+
+                token_add(
+                    store,
+                    type,
+                    line,
+                    column,
+                    pos-len,
+                    len
+                );
+
                 column += len;
                 break;
             }
