@@ -38,7 +38,7 @@ typedef struct {
 } TokenStore;
 
 /**
- * Runs the lexer on `fpath` populating `*store` with token data
+ * @brief Runs the lexer on `fpath` populating `*store` with token data
  *
  * @param *store    pointer to a TokenStore struct
  * @param *fpath    string containing file path to .toml file
@@ -48,7 +48,7 @@ typedef struct {
 int lexer(TokenStore *store, const char *fpath);
 
 /**
- * Frees all the data of a store safely
+ * @brief Frees all the data of a store safely
  *
  * @param *store    TokenStore struct
  *
@@ -57,7 +57,7 @@ int lexer(TokenStore *store, const char *fpath);
 void token_store_free(TokenStore *store);
 
 /**
- * Prints a single token's data
+ * @brief Prints a single token's data
  *
  * @param *store   TokenStore struct
  * @param i        index of the token to print
